@@ -7,8 +7,8 @@ cowin:
 
 telegram:
     tBaseUrl: https://api.telegram.org
-    tApiKey: 1847492768:AAFhDHo_UCJ9G-S8D6pbZWsOE8SaPtYNBWY
-    tChannelName : vcpunedistrict
+    tApiKey: <TODO - API KEY HERE>
+    tChannelName : <TODO channel name here>
 
 districts:
   all:

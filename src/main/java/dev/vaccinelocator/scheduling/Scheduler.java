@@ -16,7 +16,7 @@ import java.util.List;
 @Slf4j
 public class Scheduler {
   private static final int ONE_MINUTE = 1000 * 60;
-  private static final int FIXED_SCHEDULER_DELAY = 10 * ONE_MINUTE;
+  private static final int FIXED_SCHEDULER_DELAY = 20 * ONE_MINUTE;
 
   private final VaccineLocatorService vaccineLocatorService;
   private final TelegramService telegramService;
