@@ -27,7 +27,7 @@ public class Scheduler {
     this.telegramService = telegramService;
   }
 
-  @Scheduled(fixedDelay = (1000 * 30))
+  @Scheduled(fixedDelay = FIXED_SCHEDULER_DELAY)
   public void testSchedule() {
     log.info("Schedular invoked");
     vaccineLocatorService.getEighteenPlusCentres()
