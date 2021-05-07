@@ -31,7 +31,7 @@ public class TelegramServiceImpl implements TelegramService{
                 .bodyToMono(TelegramResponse.class)
                 .subscribe(telegramResponse -> {
                     log.info(telegramResponse.getOk());
-                    })
+                })
         )
         .collect(Collectors.toList());
   }

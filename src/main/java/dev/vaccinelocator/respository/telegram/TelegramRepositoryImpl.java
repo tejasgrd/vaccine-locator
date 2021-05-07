@@ -1,12 +1,16 @@
 package dev.vaccinelocator.respository.telegram;
 
+import dev.vaccinelocator.CowinException;
 import dev.vaccinelocator.configuration.VaccineLocatorConfiguration;
 import dev.vaccinelocator.constants.RequestConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+
 @Component
 public class TelegramRepositoryImpl implements TelegramRepository {
 
@@ -34,7 +38,9 @@ public class TelegramRepositoryImpl implements TelegramRepository {
         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
         .header(HttpHeaders.ACCEPT_LANGUAGE,RequestConstants.LANGUAGE)
         .header(HttpHeaders.USER_AGENT, RequestConstants.USER_AGENT)
-        .retrieve();
+        .retrieve()
+        .onStatus(HttpStatus::is5xxServerError, response -> Mono.just(new CowinException("500 error!")))
+        .onStatus(HttpStatus::is4xxClientError, response -> Mono.just(new CowinException("400 error!")));
   }
 
   private String getTelegram(String message) {
