@@ -67,6 +67,8 @@ public class TelegramServiceImpl implements TelegramService{
     builder.append("\n");
     builder.append("Centre Address : "+centre.getAddress());
     builder.append("\n");
+    builder.append("Centre Pincode : "+centre.getPincode());
+    builder.append("\n");
     builder.append("Available Sessions");
     builder.append("\n");
     for(Session session : centre.getSessions()){
