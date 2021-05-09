@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,7 +25,6 @@ public class TelegramServiceImpl implements TelegramService{
 
   @Override
   public void postMessageToChannel(List<VaccineCentre> vaccineCentres) {
-
     vaccineCentres.stream()
         .map(vaccineCentre ->
             telegramRepository
@@ -34,6 +35,27 @@ public class TelegramServiceImpl implements TelegramService{
                 })
         )
         .collect(Collectors.toList());
+  }
+
+  @Override
+  public void postUpdateMessage(List<String> centres){
+    telegramRepository
+        .postMessageToChannel(getUpdateMessageStringForCentres(centres))
+        .bodyToMono(TelegramResponse.class)
+        .subscribe(telegramResponse -> {
+          log.info(telegramResponse.getOk());
+        });
+  }
+
+  private String getUpdateMessageStringForCentres(List<String> centres){
+    StringBuilder builder = new StringBuilder();
+    builder.append("Last updated vaccine slots are no longer available for below centres");
+    builder.append("\n");
+    for(String centre: centres){
+      builder.append(centres);
+      builder.append("\n");
+    }
+    return builder.toString();
   }
 
 
