@@ -48,6 +48,8 @@ public class TelegramServiceImpl implements TelegramService{
     builder.append("Available Sessions");
     builder.append("\n");
     for(Session session : centre.getSessions()){
+      builder.append("Sessions :");
+      builder.append("\n");
       builder.append("Date : "+session.getDateForVaccination());
       builder.append("\n");
       builder.append("Vaccine Type : "+session.getVaccine());
@@ -55,6 +57,13 @@ public class TelegramServiceImpl implements TelegramService{
       builder.append("Available Quantity : "+session.getAvailable_capacity());
       builder.append("\n");
       builder.append("Minimum Age : "+session.getMin_age_limit());
+      builder.append("\n");
+      builder.append("Slots :");
+      builder.append("\n");
+      for(String slot: session.getSlots()){
+        builder.append(slot);
+        builder.append("\n");
+      }
     }
 
     return builder.toString();

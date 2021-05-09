@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -16,8 +16,8 @@ import java.util.List;
 public class Session {
   String session_id;
   @JsonProperty(value = "date")
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-mm-yyyy")
-  Date dateForVaccination;
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+  LocalDate dateForVaccination;
   int available_capacity;
   int min_age_limit;
   VaccineBrand vaccine;
