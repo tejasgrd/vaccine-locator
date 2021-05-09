@@ -4,6 +4,7 @@ import dev.vaccinelocator.models.DistrictCentres;
 import dev.vaccinelocator.models.Session;
 import dev.vaccinelocator.models.VaccineCentre;
 import dev.vaccinelocator.respository.cowin.CowinCrudRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -15,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class VaccineLocatorServiceImpl implements VaccineLocatorService {
 
   private static final int AGE_EIGHTEEN_PLUS = 18;
@@ -46,11 +48,12 @@ public class VaccineLocatorServiceImpl implements VaccineLocatorService {
     List<VaccineCentre> filteredCentres = centres.stream()
         .filter(vaccineCentre -> notifiedCentres.containsKey(vaccineCentre.getCenter_id()) ? false : true)
         .collect(Collectors.toList());
-    if (centres.isEmpty()) {
-      if(!notifiedCentres.isEmpty())
+    if (centres.isEmpty() && !notifiedCentres.isEmpty()) {
+        log.info("No Slots found updating cache and posting message to Channel");
         telegramService.postUpdateMessage(new ArrayList<>(notifiedCentres.values()));
-      notifiedCentres.clear();
-    } else {
+        notifiedCentres.clear();
+    } else if (!filteredCentres.isEmpty()){
+      log.info("New Slots found, updating cache");
       for (VaccineCentre filtered : filteredCentres) {
         notifiedCentres.put(filtered.getCenter_id(), filtered.getName());
       }
