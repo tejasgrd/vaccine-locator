@@ -54,6 +54,6 @@ public class VaccineLocatorServiceImpl implements VaccineLocatorService {
      Even if the single criteria met, that centre is filtered
    */
   private static boolean sessionFilter(Session session) {
-    return session.getMin_age_limit() == AGE_EIGHTEEN_PLUS && session.getAvailable_capacity() > 0;
+    return session.getMin_age_limit() == AGE_EIGHTEEN_PLUS && session.getAvailable_capacity() >= 0;
   }
 }
