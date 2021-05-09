@@ -43,7 +43,7 @@ public class TelegramServiceImpl implements TelegramService{
         .postMessageToChannel(getUpdateMessageStringForCentres(centres))
         .bodyToMono(TelegramResponse.class)
         .subscribe(telegramResponse -> {
-          log.info(telegramResponse.getOk());
+          log.info("Updated empty status of vaccine slots");
         });
   }
 
