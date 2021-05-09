@@ -38,8 +38,8 @@ public class VaccineLocatorServiceImpl implements VaccineLocatorService {
   @Override
   public Flux<List<VaccineCentre>> getEighteenPlusCentres() {
     return cowinCrudRepository.getDistrictCentresByDistrictId()
-        .map(districtCentres -> removeAlreadyNotifiedCenters(districtCentres.getCenters()))
-        .map(vaccineCentres -> filterVaccineCentres(vaccineCentres));
+        .map(districtCentres -> districtCentres.getCenters())
+        .map(vaccineCentres -> removeAlreadyNotifiedCenters(filterVaccineCentres(vaccineCentres)));
   }
 
   private List<VaccineCentre> removeAlreadyNotifiedCenters(List<VaccineCentre> centres) {
