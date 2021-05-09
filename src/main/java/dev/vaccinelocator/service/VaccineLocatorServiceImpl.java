@@ -8,7 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Service
@@ -16,11 +19,15 @@ public class VaccineLocatorServiceImpl implements VaccineLocatorService {
 
   private static final int AGE_EIGHTEEN_PLUS = 18;
   private final CowinCrudRepository cowinCrudRepository;
+  private final TelegramService telegramService;
+  private Map<Integer, String> notifiedCentres = new ConcurrentHashMap<Integer, String>();
 
 
   @Autowired
-  public VaccineLocatorServiceImpl(CowinCrudRepository cowinCrudRepository) {
+  public VaccineLocatorServiceImpl(final CowinCrudRepository cowinCrudRepository,
+                                   final TelegramService telegramService) {
     this.cowinCrudRepository = cowinCrudRepository;
+    this.telegramService = telegramService;
   }
 
   @Override
@@ -31,8 +38,24 @@ public class VaccineLocatorServiceImpl implements VaccineLocatorService {
   @Override
   public Flux<List<VaccineCentre>> getEighteenPlusCentres() {
     return cowinCrudRepository.getDistrictCentresByDistrictId()
-        .map(districtCentres -> districtCentres.getCenters())
+        .map(districtCentres -> removeAlreadyNotifiedCenters(districtCentres.getCenters()))
         .map(vaccineCentres -> filterVaccineCentres(vaccineCentres));
+  }
+
+  private List<VaccineCentre> removeAlreadyNotifiedCenters(List<VaccineCentre> centres) {
+    List<VaccineCentre> filteredCentres = centres.stream()
+        .filter(vaccineCentre -> notifiedCentres.containsKey(vaccineCentre.getCenter_id()) ? false : true)
+        .collect(Collectors.toList());
+    if (centres.isEmpty()) {
+      if(!notifiedCentres.isEmpty())
+        telegramService.postUpdateMessage(new ArrayList<>(notifiedCentres.values()));
+      notifiedCentres.clear();
+    } else {
+      for (VaccineCentre filtered : filteredCentres) {
+        notifiedCentres.put(filtered.getCenter_id(), filtered.getName());
+      }
+    }
+    return filteredCentres;
   }
 
   private List<VaccineCentre> filterVaccineCentres(List<VaccineCentre> centres) {

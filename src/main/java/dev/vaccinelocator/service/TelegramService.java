@@ -7,4 +7,6 @@ import java.util.List;
 public interface TelegramService {
 
   void postMessageToChannel(List<VaccineCentre> vaccineCentres);
+
+  void postUpdateMessage(List<String> centres);
 }
