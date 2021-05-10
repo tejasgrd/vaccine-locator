@@ -52,7 +52,7 @@ public class TelegramServiceImpl implements TelegramService{
     builder.append("Last updated vaccine slots are no longer available for below centres");
     builder.append("\n");
     for(String centre: centres){
-      builder.append(centres);
+      builder.append(centre);
       builder.append("\n");
     }
     return builder.toString();
