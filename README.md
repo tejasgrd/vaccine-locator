@@ -28,6 +28,7 @@ mvn spring-boot:run
 | District      | Telegram Channel |
 | ------------- | ---------------- |
 | Pune          | vcpunedistrict   |
+| Nagpur        | NagpurCowin      |
 
 ## License
 
