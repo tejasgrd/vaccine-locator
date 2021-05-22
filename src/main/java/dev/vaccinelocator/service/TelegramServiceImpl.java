@@ -80,11 +80,7 @@ public class TelegramServiceImpl implements TelegramService{
       builder.append("\n");
       builder.append("Date : "+session.getDateForVaccination());
       builder.append("\n");
-      if(session.getMin_age_limit() == 18) {
-        builder.append("Minimum Age :  18+ ");
-      }else{
-        builder.append("Minimum Age :  45+ ");
-      }
+      builder.append("Minimum Age : "+session.getMin_age_limit());
       builder.append("\n");
       builder.append("Vaccine Type : "+session.getVaccine());
       builder.append("\n");
