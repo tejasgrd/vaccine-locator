@@ -11,5 +11,6 @@ import lombok.NoArgsConstructor;
 public class CentreDetails {
 
   private int centreId;
+  private String centreName;
   private int totalCapacity;
 }

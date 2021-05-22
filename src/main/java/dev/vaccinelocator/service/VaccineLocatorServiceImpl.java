@@ -50,25 +50,27 @@ public class VaccineLocatorServiceImpl implements VaccineLocatorService {
         .filter(this::isCentreUpdated)
         .collect(Collectors.toList());
     if (centres.isEmpty() && !notifiedCentres.isEmpty()) {
-        log.info("No Slots found updating cache and posting message to Channel");
-        telegramService.postUpdateMessage(new ArrayList<>(notifiedCentres.values()));
-        notifiedCentres.clear();
-    } else if (!filteredCentres.isEmpty()){
+      log.info("No Slots found updating cache and posting message to Channel");
+      List<String> centreNames = notifiedCentres.values().stream().map(vc -> vc.getCentreName()).collect(Collectors.toList());
+      telegramService.postUpdateMessage(centreNames);
+      notifiedCentres.clear();
+    } else if (!filteredCentres.isEmpty()) {
       log.info("New Slots found, updating cache");
       for (VaccineCentre filtered : filteredCentres) {
         int totalAvailabelVaccines = totalCapacityOfCentre(filtered);
-        notifiedCentres.put(filtered.getCenter_id(), new CentreDetails(filtered.getCenter_id(), totalAvailabelVaccines));
+        notifiedCentres.put(filtered.getCenter_id(), new CentreDetails(filtered.getCenter_id(), filtered.getName(),
+            totalAvailabelVaccines));
       }
     }
     return filteredCentres;
   }
 
   private boolean isCentreUpdated(VaccineCentre vaccineCentre) {
-    if (notifiedCentres.containsKey(accineCentre.getCenter_id())) {
-      CentreDetails centreDetails = notifiedCentres.get(accineCentre.getCenter_id());
+    if (notifiedCentres.containsKey(vaccineCentre.getCenter_id())) {
+      CentreDetails centreDetails = notifiedCentres.get(vaccineCentre.getCenter_id());
       return centreDetails.getTotalCapacity() != totalCapacityOfCentre(vaccineCentre) ? true :false;
     }
-    return true
+    return true;
   }
 
   private int totalCapacityOfCentre(VaccineCentre vaccineCentre) {
