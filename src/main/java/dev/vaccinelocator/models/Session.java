@@ -22,4 +22,6 @@ public class Session {
   int min_age_limit;
   VaccineBrand vaccine;
   List<String> slots;
+  int available_capacity_dose1;
+  int available_capacity_dose2;
 }
