@@ -1,11 +1,14 @@
 package dev.vaccinelocator.respository.cowin;
 
+import dev.vaccinelocator.CowinException;
 import dev.vaccinelocator.configuration.DistrictsConfiguration;
 import dev.vaccinelocator.configuration.VaccineLocatorConfiguration;
 import dev.vaccinelocator.constants.RequestConstants;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -33,7 +36,9 @@ public class AbstractRestRepository<T> implements RestRepository<T> {
         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
         .header(HttpHeaders.ACCEPT_LANGUAGE,RequestConstants.LANGUAGE)
         .header(HttpHeaders.USER_AGENT, RequestConstants.USER_AGENT)
-        .retrieve();
+        .retrieve()
+        .onStatus(HttpStatus::is5xxServerError, response -> Mono.just(new CowinException("Cowin API , 500 error!")))
+        .onStatus(HttpStatus::is4xxClientError, response -> Mono.just(new CowinException("Cowin API , 400 error!")));
   }
 
   private String getUri() {

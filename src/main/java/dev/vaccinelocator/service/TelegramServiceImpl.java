@@ -1,5 +1,7 @@
 package dev.vaccinelocator.service;
 
+import dev.vaccinelocator.CowinException;
+import dev.vaccinelocator.models.Fees;
 import dev.vaccinelocator.models.Session;
 import dev.vaccinelocator.models.VaccineCentre;
 import dev.vaccinelocator.models.telegram.TelegramResponse;
@@ -7,7 +9,9 @@ import dev.vaccinelocator.respository.telegram.TelegramRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import reactor.util.retry.Retry;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,9 +34,17 @@ public class TelegramServiceImpl implements TelegramService{
             telegramRepository
                 .postMessageToChannel(getAlertMessage(vaccineCentre))
                 .bodyToMono(TelegramResponse.class)
+                .retryWhen(
+                    Retry.backoff(3, Duration.ofSeconds(3))// Max 3 retires with BackOff Strategy
+                    .filter(telegramResponse -> telegramResponse instanceof CowinException)
+                    .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> {
+                        throw new CowinException("RetryExhausted Posting message to telegram");
+                    })
+                )
+
                 .subscribe(telegramResponse -> {
-                    log.info(telegramResponse.getOk());
-                })
+      log.info(telegramResponse.getOk());
+    })
         )
         .collect(Collectors.toList());
   }
@@ -72,7 +84,7 @@ public class TelegramServiceImpl implements TelegramService{
     builder.append("\n");
     builder.append("Pincode : "+centre.getPincode());
     builder.append("\n");
-    builder.append("Fee : "+centre.getFee_type());
+    builder.append("Fee : "+centre.getFee_type().getValue());
     builder.append("\n");
     builder.append("Available Sessions");
     builder.append("\n");
@@ -87,8 +99,13 @@ public class TelegramServiceImpl implements TelegramService{
       builder.append("Dose 1 Capacity : "+session.getAvailable_capacity_dose1());
       builder.append("\n");
       builder.append("Dose 2 Capacity : "+session.getAvailable_capacity_dose2());
-
       builder.append("\n");
+    }
+    if(centre.getVaccine_fees() != null) {
+      for (Fees fee : centre.getVaccine_fees()) {
+        builder.append("\n");
+        builder.append("Fees : ₹" + fee.getFee());
+      }
     }
 
     return builder.toString();

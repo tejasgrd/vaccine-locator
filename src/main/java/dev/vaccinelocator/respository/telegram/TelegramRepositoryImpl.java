@@ -39,8 +39,8 @@ public class TelegramRepositoryImpl implements TelegramRepository {
         .header(HttpHeaders.ACCEPT_LANGUAGE,RequestConstants.LANGUAGE)
         .header(HttpHeaders.USER_AGENT, RequestConstants.USER_AGENT)
         .retrieve()
-        .onStatus(HttpStatus::is5xxServerError, response -> Mono.just(new CowinException("500 error!")))
-        .onStatus(HttpStatus::is4xxClientError, response -> Mono.just(new CowinException("400 error!")));
+        .onStatus(HttpStatus::is5xxServerError, response -> Mono.just(new CowinException("Telegram API , 500 error!")))
+        .onStatus(HttpStatus::is4xxClientError, response -> Mono.just(new CowinException("Telegram API , 400 error!")));
   }
 
   private String getTelegram(String message) {
