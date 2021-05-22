@@ -61,33 +61,38 @@ public class TelegramServiceImpl implements TelegramService{
 
   private String getAlertMessage(VaccineCentre centre){
     StringBuilder builder = new StringBuilder();
-    builder.append("Centre ID : "+ centre.getCenter_id());
+    builder.append("Vaccination Centre");
     builder.append("\n");
-    builder.append("Centre Name : "+centre.getName());
     builder.append("\n");
-    builder.append("Centre Address : "+centre.getAddress());
+    builder.append("Name : "+centre.getName());
     builder.append("\n");
-    builder.append("Centre Pincode : "+centre.getPincode());
+    builder.append("\n");
+    builder.append("Address : "+centre.getAddress());
+    builder.append("\n");
+    builder.append("\n");
+    builder.append("Pincode : "+centre.getPincode());
+    builder.append("\n");
+    builder.append("Fee : "+centre.getFee_type());
     builder.append("\n");
     builder.append("Available Sessions");
     builder.append("\n");
     for(Session session : centre.getSessions()){
-      builder.append("Sessions :");
       builder.append("\n");
       builder.append("Date : "+session.getDateForVaccination());
       builder.append("\n");
+      if(session.getMin_age_limit() == 18) {
+        builder.append("Minimum Age :  18+ ");
+      }else{
+        builder.append("Minimum Age :  45+ ");
+      }
+      builder.append("\n");
       builder.append("Vaccine Type : "+session.getVaccine());
       builder.append("\n");
-      builder.append("Available Quantity : "+session.getAvailable_capacity());
+      builder.append("Dose 1 Capacity : "+session.getAvailable_capacity_dose1());
       builder.append("\n");
-      builder.append("Minimum Age : "+session.getMin_age_limit());
+      builder.append("Dose 2 Capacity : "+session.getAvailable_capacity_dose2());
+
       builder.append("\n");
-      builder.append("Slots :");
-      builder.append("\n");
-      for(String slot: session.getSlots()){
-        builder.append(slot);
-        builder.append("\n");
-      }
     }
 
     return builder.toString();
