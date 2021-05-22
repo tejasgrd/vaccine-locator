@@ -30,5 +30,5 @@ public class VaccineCentre {
   private Date to;
   private FeeType fee_type;
   private List<Session> sessions;
-
+  private List<Fees> vaccine_fees;
 }
