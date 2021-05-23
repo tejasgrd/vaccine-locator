@@ -3,6 +3,7 @@ package dev.vaccinelocator.service;
 import dev.vaccinelocator.models.DistrictCentres;
 import dev.vaccinelocator.models.Session;
 import dev.vaccinelocator.models.VaccineCentre;
+import dev.vaccinelocator.models.cache.CentreDetails;
 import dev.vaccinelocator.respository.cowin.CowinCrudRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,7 @@ public class VaccineLocatorServiceImpl implements VaccineLocatorService {
   private static final int AGE_EIGHTEEN_PLUS = 18;
   private final CowinCrudRepository cowinCrudRepository;
   private final TelegramService telegramService;
-  private Map<Integer, String> notifiedCentres = new ConcurrentHashMap<Integer, String>();
+  private Map<Integer, CentreDetails> notifiedCentres = new ConcurrentHashMap<Integer, CentreDetails>();
 
 
   @Autowired
@@ -46,19 +47,36 @@ public class VaccineLocatorServiceImpl implements VaccineLocatorService {
 
   private List<VaccineCentre> removeAlreadyNotifiedCenters(List<VaccineCentre> centres) {
     List<VaccineCentre> filteredCentres = centres.stream()
-        .filter(vaccineCentre -> notifiedCentres.containsKey(vaccineCentre.getCenter_id()) ? false : true)
+        .filter(this::isCentreUpdated)
         .collect(Collectors.toList());
     if (centres.isEmpty() && !notifiedCentres.isEmpty()) {
-        log.info("No Slots found updating cache and posting message to Channel");
-        telegramService.postUpdateMessage(new ArrayList<>(notifiedCentres.values()));
-        notifiedCentres.clear();
-    } else if (!filteredCentres.isEmpty()){
+      log.info("No Slots found updating cache and posting message to Channel");
+      List<String> centreNames = notifiedCentres.values().stream().map(vc -> vc.getCentreName()).collect(Collectors.toList());
+      telegramService.postUpdateMessage(centreNames);
+      notifiedCentres.clear();
+    } else if (!filteredCentres.isEmpty()) {
       log.info("New Slots found, updating cache");
       for (VaccineCentre filtered : filteredCentres) {
-        notifiedCentres.put(filtered.getCenter_id(), filtered.getName());
+        int totalAvailabelVaccines = totalCapacityOfCentre(filtered);
+        notifiedCentres.put(filtered.getCenter_id(), new CentreDetails(filtered.getCenter_id(), filtered.getName(),
+            totalAvailabelVaccines));
       }
     }
     return filteredCentres;
+  }
+
+  private boolean isCentreUpdated(VaccineCentre vaccineCentre) {
+    if (notifiedCentres.containsKey(vaccineCentre.getCenter_id())) {
+      CentreDetails centreDetails = notifiedCentres.get(vaccineCentre.getCenter_id());
+      return centreDetails.getTotalCapacity() != totalCapacityOfCentre(vaccineCentre) ? true :false;
+    }
+    return true;
+  }
+
+  private int totalCapacityOfCentre(VaccineCentre vaccineCentre) {
+    return vaccineCentre.getSessions().stream()
+        .map(session -> session.getAvailable_capacity())
+        .reduce(0, (a, b) -> a + b);
   }
 
   private List<VaccineCentre> filterVaccineCentres(List<VaccineCentre> centres) {
