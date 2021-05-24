@@ -67,8 +67,9 @@ public class VaccineLocatorServiceImpl implements VaccineLocatorService {
 
   private boolean isCentreUpdated(VaccineCentre vaccineCentre) {
     if (notifiedCentres.containsKey(vaccineCentre.getCenter_id())) {
+      int fetchedCentreCapacity = totalCapacityOfCentre(vaccineCentre);
       CentreDetails centreDetails = notifiedCentres.get(vaccineCentre.getCenter_id());
-      return centreDetails.getTotalCapacity() != totalCapacityOfCentre(vaccineCentre) ? true :false;
+      return centreDetails.getTotalCapacity() != fetchedCentreCapacity ? true :false;
     }
     return true;
   }
@@ -81,8 +82,17 @@ public class VaccineLocatorServiceImpl implements VaccineLocatorService {
 
   private List<VaccineCentre> filterVaccineCentres(List<VaccineCentre> centres) {
     return centres.stream()
+        .map(this::filterSessions)
         .filter(this::vaccineAvailabilityFilter)
         .collect(Collectors.toList());
+  }
+
+  private VaccineCentre filterSessions(VaccineCentre vaccineCentre) {
+    List<Session> filteredSessions = vaccineCentre.getSessions().stream()
+        .filter(session -> session.getMin_age_limit() == AGE_EIGHTEEN_PLUS)
+        .collect(Collectors.toList());
+    vaccineCentre.setSessions(filteredSessions);
+    return vaccineCentre;
   }
 
   private boolean filterAvailableSessionForEighteenPlus(List<Session> sessions) {
@@ -98,6 +108,7 @@ public class VaccineLocatorServiceImpl implements VaccineLocatorService {
      Even if the single criteria met, that centre is filtered
    */
   private static boolean sessionFilter(Session session) {
-    return session.getMin_age_limit() == AGE_EIGHTEEN_PLUS && session.getAvailable_capacity() > 0;
+    return session.getMin_age_limit() == AGE_EIGHTEEN_PLUS && session.getAvailable_capacity() > 0
+          && (session.getAvailable_capacity_dose1() > 0 || session.getAvailable_capacity_dose2() > 0);
   }
 }
