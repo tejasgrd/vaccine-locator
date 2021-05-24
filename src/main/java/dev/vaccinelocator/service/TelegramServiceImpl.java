@@ -73,6 +73,9 @@ public class TelegramServiceImpl implements TelegramService{
 
   private String getAlertMessage(VaccineCentre centre){
     StringBuilder builder = new StringBuilder();
+    int totalDoseOneCapacity= 0;
+    int totalDoseTwoCapacity = 0;
+    int totalDoseCapacity = 0;
     builder.append("Vaccination Centre");
     builder.append("\n");
     builder.append("\n");
@@ -86,21 +89,21 @@ public class TelegramServiceImpl implements TelegramService{
     builder.append("\n");
     builder.append("Fee : "+centre.getFee_type().getValue());
     builder.append("\n");
-    builder.append("Available Sessions");
     builder.append("\n");
-    for(Session session : centre.getSessions()){
-      builder.append("\n");
-      builder.append("Date : "+session.getDateForVaccination());
-      builder.append("\n");
-      builder.append("Minimum Age : "+session.getMin_age_limit());
-      builder.append("\n");
-      builder.append("Vaccine Type : "+session.getVaccine());
-      builder.append("\n");
-      builder.append("Dose 1 Capacity : "+session.getAvailable_capacity_dose1());
-      builder.append("\n");
-      builder.append("Dose 2 Capacity : "+session.getAvailable_capacity_dose2());
-      builder.append("\n");
+    for(Session session: centre.getSessions()){
+      totalDoseOneCapacity += session.getAvailable_capacity_dose1();
+      totalDoseTwoCapacity += session.getAvailable_capacity_dose2();
+      totalDoseCapacity += session.getAvailable_capacity();
     }
+
+    builder.append("Available Vaccine Doses : "+totalDoseCapacity);
+    builder.append("\n");
+    builder.append("Total Dose 1 Capacity : "+totalDoseOneCapacity);
+    builder.append("\n");
+    builder.append("Total Dose 2 Capacity : "+totalDoseTwoCapacity);
+
+    builder.append("\n");
+    builder.append("\n");
     if(centre.getVaccine_fees() != null) {
       for (Fees fee : centre.getVaccine_fees()) {
         builder.append("\n");
